@@ -1,17 +1,28 @@
-require("dotenv").config();
+require("dotenv").config({ path: "./backend/.env" });
+
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
 
 const app = express();
 
+// Connect Database
 connectDB();
 
-app.use(cors());
+// Middlewares
 app.use(express.json());
 
-app.use("/api/auth", require("./routes/auth"));
+app.use(cors({
+  origin: "https://exam-help-seven.vercel.app",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
+// Routes
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/orders", require("./routes/order"));
+
+// Test route
 app.get("/", (req, res) => {
   res.send("Backend is working 🚀");
 });
