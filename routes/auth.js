@@ -5,31 +5,67 @@ const User = require("../models/User");
 
 const router = express.Router();
 
-// Signup
+// =======================
+// 🧾 SIGNUP
+// =======================
 router.post("/signup", async (req, res) => {
-  const { name, email, mobile, password } = req.body;
+  try {
+    const { name, email, mobile, password } = req.body;
 
-  const exist = await User.findOne({ email });
-  if (exist) return res.status(400).json({ msg: "User exists" });
+    if (!name || !email || !mobile || !password) {
+      return res.status(400).json({ msg: "All fields required" });
+    }
 
-  const hash = await bcrypt.hash(password, 10);
-  const user = await User.create({ name, email, mobile, password: hash });
+    const exist = await User.findOne({ email });
+    if (exist) return res.status(400).json({ msg: "User already exists" });
 
-  res.json({ success: true });
+    const hash = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name,
+      email,
+      mobile,
+      password: hash
+    });
+
+    res.json({ success: true, msg: "Signup successful" });
+
+  } catch (err) {
+    console.error("Signup error:", err);
+    res.status(500).json({ msg: "Signup failed" });
+  }
 });
 
-// Login
+// =======================
+// 🔐 LOGIN  (FINAL FIX)
+// =======================
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
-  if (!user) return res.status(400).json({ msg: "Invalid credentials" });
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ msg: "Invalid credentials" });
 
-  const match = await bcrypt.compare(password, user.password);
-  if (!match) return res.status(400).json({ msg: "Invalid credentials" });
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(400).json({ msg: "Invalid credentials" });
 
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-  res.json({ token, name: user.name });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d"
+    });
+
+    // 👇 FRONTEND COMPATIBLE RESPONSE
+    res.json({
+      token,
+      name: user.name,
+      email: user.email,
+      mobile: user.mobile,
+      isAdmin: false
+    });
+
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ msg: "Login failed" });
+  }
 });
 
 module.exports = router;
