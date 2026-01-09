@@ -13,10 +13,14 @@ connectDB();
 app.use(express.json());
 
 app.use(cors({
-  origin: "https://exam-help-seven.vercel.app",
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: [
+    "https://exam-help-seven.vercel.app",
+    "https://exam-help-ompq6jsln-sazid-ahmeds-projects.vercel.app"
+  ],
+  methods: ["GET","POST","PUT","DELETE"],
   credentials: true
 }));
+
 
 // Routes
 app.use("/api/auth", require("./routes/auth"));
