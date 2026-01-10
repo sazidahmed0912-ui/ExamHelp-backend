@@ -2,27 +2,45 @@ const express = require("express");
 const router = express.Router();
 const Order = require("../models/Order");
 
-// 🧾 CREATE ORDER
+// 🧾 CREATE ORDER WITH COUPON + REFER DISCOUNT
 router.post("/create", async (req, res) => {
   try {
-    const { name, email, mobile, state, amount } = req.body;
+    let { name, email, mobile, state, amount, coupon, referCode } = req.body;
 
-    // Validation
     if (!name || !email || !mobile || !amount) {
       return res.status(400).json({ msg: "All fields required" });
     }
+
+    let discount = 0;
+
+    // 🎟 Coupon logic
+    if (coupon && coupon.toUpperCase() === "SHAHID20") {
+      discount += 20;
+    }
+
+    // 🤝 Refer & Earn logic
+    if (referCode && referCode.toUpperCase() === "REFER50") {
+      discount += 50;
+    }
+
+    const finalAmount = Math.max(amount - discount, 0);
 
     const order = await Order.create({
       name,
       email,
       mobile,
       state,
-      amount,
+      originalAmount: amount,
+      discount,
+      amount: finalAmount,
+      coupon,
+      referCode,
       status: "PAID",
       createdAt: new Date()
     });
 
     res.json(order);
+
   } catch (error) {
     console.error("Order error:", error);
     res.status(500).json({ msg: "Order failed" });

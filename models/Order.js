@@ -5,7 +5,14 @@ const OrderSchema = new mongoose.Schema({
   email: String,
   mobile: String,
   state: String,
-  amount: Number,
+
+  originalAmount: Number,   // Actual price before discount
+  discount: Number,         // Total discount applied
+  amount: Number,           // Final payable amount
+
+  coupon: String,
+  referCode: String,
+
   status: String,
   createdAt: Date
 });
