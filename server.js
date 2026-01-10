@@ -37,6 +37,7 @@ app.use(cors({
 // Routes
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/orders", require("./routes/order"));
+app.use("/api/pdf", require("./routes/pdf"));
 
 // Test route
 app.get("/", (req, res) => {
