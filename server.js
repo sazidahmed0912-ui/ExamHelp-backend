@@ -15,11 +15,13 @@ app.use(express.json());
 app.use(cors({
   origin: [
     "https://exam-help-seven.vercel.app",
-    "https://exam-help-ompq6jsln-sazid-ahmeds-projects.vercel.app"
+    "https://exam-help-k1nllaj5z-sazid-ahmeds-projects.vercel.app",
+    "https://exam-help-git-main-sazid-ahmeds-projects.vercel.app"
   ],
   methods: ["GET","POST","PUT","DELETE"],
   credentials: true
 }));
+
 
 
 // Routes
