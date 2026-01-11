@@ -2,17 +2,18 @@ require("dotenv").config({ path: "./backend/.env" });
 
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const connectDB = require("./config/db");
 
 const app = express();
 
-// Connect Database
+// ─────────────────── DB ───────────────────
 connectDB();
 
-// Middlewares
+// ───────────────── Middlewares ────────────
 app.use(express.json());
 
-// Dynamic CORS using Render environment variables
+// Allowed frontend URLs
 const allowedOrigins = [
   process.env.CLIENT_URL,
   process.env.CLIENT_PREVIEW_URL,
@@ -21,36 +22,41 @@ const allowedOrigins = [
   "https://exam-help-git-main-sazid-ahmeds-projects.vercel.app"
 ];
 
-app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log("Blocked by CORS:", origin);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log("❌ Blocked by CORS:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+  })
+);
 
-// Routes
+// ────────────────── API Routes ─────────────
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/orders", require("./routes/order"));
 app.use("/api/pdf", require("./routes/pdf"));
 
-// Test route
-app.get("/", (req, res) => {
-  res.send("Backend is working 🚀");
+// ───────────────── Test API ────────────────
+app.get("/api/health", (req, res) => {
+  res.json({ status: "Backend is healthy 🚀" });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log("Server running on port", PORT));
-const path = require("path");
-
-// Frontend serve karo
+// ───────────────── Serve Frontend ──────────
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("*", (req, res) => {
+// ⚠️ Important fix for Node 22 (NO "*")
+app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// ───────────────── Server Start ────────────
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
 });
